@@ -8,8 +8,6 @@ namespace Zettings
 {
     public partial class ZettingWindow : Window
     {
-        private const string AllIsWell = "All is well =)";
-
         public string GameName { get { return gameName.Text; } }
 
         public ZettingWindow()
@@ -17,29 +15,38 @@ namespace Zettings
             InitializeComponent();
         }
 
+        private void gameName_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            status.Text = "";
+        }
+
         private void saveButton_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                errors.Text = AllIsWell;
-                Save(GetLivesplitPath(), GameName);
-            }
-            catch (Exception ex)
-            {
-                errors.Text = ex.Message;
-            }
+            Invoke(Save);
         }
 
         private void loadButton_Click(object sender, RoutedEventArgs e)
         {
+            Invoke(Load);
+        }
+
+        private void Invoke(Action<string, string> action)
+        {
+            if (string.IsNullOrWhiteSpace(GameName))
+            {
+                status.Text = "Err: Name empty";
+                return;
+            }
+
             try
             {
-                errors.Text = AllIsWell;
-                Load(GetLivesplitPath(), GameName);
+                status.Text = "";
+                action.Invoke(GetLivesplitPath(), GameName);
+                status.Text = $"Success: { action.Method.Name }";
             }
             catch (Exception ex)
             {
-                errors.Text = ex.Message;
+                status.Text = $"Ex: {ex.Message}";
             }
         }
 
